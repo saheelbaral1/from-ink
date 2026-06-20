@@ -38,6 +38,10 @@ body::before {
   pointer-events: none;
   opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.85'%20numOctaves='4'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Ambient: extremely slow drift so the page feels quietly alive.
+     Overscan (scale >= 1.06) keeps edges covered as it pans. */
+  transform-origin: center;
+  animation: grainDrift 34s ease-in-out infinite;
 }
 
 /*
@@ -67,9 +71,39 @@ body::before {
   }
 }
 
+/* Barely-perceptible ambient drift of the paper grain (~34s loop). */
+@keyframes grainDrift {
+  0% {
+    transform: scale(1.06) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.12) translate(-1.2%, 1%);
+  }
+  100% {
+    transform: scale(1.06) translate(0, 0);
+  }
+}
+
+/*
+ * Scroll-reveal: sections start hidden, then JS (Reveal.tsx, IntersectionObserver)
+ * applies an inline fadeInUp animation once they enter the viewport. The resting
+ * state is fully visible, so if JS never runs the reduced-motion rule below keeps
+ * content visible.
+ */
+.reveal-init {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [style*="breathe"],
   [style*="fadeInUp"] {
+    animation: none !important;
+  }
+  /* Don't leave reveal content stuck hidden when motion is off. */
+  .reveal-init {
+    opacity: 1 !important;
+  }
+  body::before {
     animation: none !important;
   }
 }

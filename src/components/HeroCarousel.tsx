@@ -204,7 +204,7 @@ export default function HeroCarousel() {
               aria-valuemax={100}
               aria-orientation="horizontal"
               onKeyDown={onKeyDown}
-              className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full bg-white shadow-paper ring-1 ring-navy/10 focus-visible:outline-2 focus-visible:outline-terracotta"
+              className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full bg-white shadow-paper ring-1 ring-navy/10 transition duration-200 focus-visible:outline-2 focus-visible:outline-terracotta"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <path
