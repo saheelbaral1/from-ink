@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
               description: "A beautiful watercolor print of your child's drawing, shipped to your door.",
               images: [imageUrl],
             },
-            unit_amount: 2900,
+            unit_amount: 3900,
           },
           quantity: 1,
         },
