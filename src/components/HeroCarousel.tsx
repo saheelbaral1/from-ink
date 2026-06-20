@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { CornerDownLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const pairs = [
   {
@@ -35,16 +35,61 @@ export default function HeroCarousel() {
   const [index, setIndex] = useState(0);
   const [position, setPosition] = useState(DEFAULT_POSITION);
   const [dragging, setDragging] = useState(false);
+  // While true, the handle/clip animate smoothly — used only for the first-load
+  // "nudge" hint, switched off so real dragging stays instant.
+  const [hinting, setHinting] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
+  const interacted = useRef(false);
 
   const active = pairs[index];
-  const thumbnails = pairs
-    .map((pair, i) => ({ ...pair, i }))
-    .filter((pair) => pair.i !== index);
+
+  // First-load hint: ease the handle right and back a couple of times to signal
+  // it's draggable. Cancels on any interaction; skipped under reduced-motion.
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    timers.push(
+      setTimeout(() => {
+        if (interacted.current) return;
+        setHinting(true);
+        const seq: [number, number][] = [
+          [0, 38],
+          [450, DEFAULT_POSITION],
+          [720, 31],
+          [1080, DEFAULT_POSITION],
+        ];
+        seq.forEach(([t, val]) =>
+          timers.push(
+            setTimeout(() => {
+              if (!interacted.current) setPosition(val);
+            }, t),
+          ),
+        );
+        timers.push(setTimeout(() => setHinting(false), 1500));
+      }, 1100),
+    );
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  function stopHint() {
+    interacted.current = true;
+    setHinting(false);
+  }
 
   function selectIndex(i: number) {
+    stopHint();
     setIndex(i);
     setPosition(DEFAULT_POSITION);
+  }
+
+  function prev() {
+    selectIndex((index - 1 + pairs.length) % pairs.length);
+  }
+
+  function next() {
+    selectIndex((index + 1) % pairs.length);
   }
 
   const updateFromClientX = useCallback((clientX: number) => {
@@ -56,6 +101,7 @@ export default function HeroCarousel() {
   }, []);
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    stopHint();
     setDragging(true);
     (e.target as Element).setPointerCapture(e.pointerId);
     updateFromClientX(e.clientX);
@@ -73,11 +119,26 @@ export default function HeroCarousel() {
 
   function onKeyDown(e: React.KeyboardEvent) {
     const step = e.shiftKey ? 10 : 4;
-    if (e.key === "ArrowLeft") setPosition((p) => Math.max(0, p - step));
-    if (e.key === "ArrowRight") setPosition((p) => Math.min(100, p + step));
-    if (e.key === "Home") setPosition(0);
-    if (e.key === "End") setPosition(100);
+    if (e.key === "ArrowLeft") {
+      stopHint();
+      setPosition((p) => Math.max(0, p - step));
+    }
+    if (e.key === "ArrowRight") {
+      stopHint();
+      setPosition((p) => Math.min(100, p + step));
+    }
+    if (e.key === "Home") {
+      stopHint();
+      setPosition(0);
+    }
+    if (e.key === "End") {
+      stopHint();
+      setPosition(100);
+    }
   }
+
+  // Smooth easing only during the hint; instant the rest of the time.
+  const hintTransition = hinting ? "350ms ease-in-out" : undefined;
 
   return (
     <div id="hero-carousel" className="w-full">
@@ -107,7 +168,10 @@ export default function HeroCarousel() {
           {/* BEFORE — clipped top layer, revealed left of the handle */}
           <div
             className="absolute inset-0 overflow-hidden"
-            style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
+            style={{
+              clipPath: `inset(0 ${100 - position}% 0 0)`,
+              transition: hintTransition ? `clip-path ${hintTransition}` : undefined,
+            }}
           >
             <Image
               src={active.before}
@@ -125,7 +189,10 @@ export default function HeroCarousel() {
           {/* Drag handle */}
           <div
             className="absolute bottom-0 top-0 z-20 w-0 -translate-x-1/2"
-            style={{ left: `${position}%` }}
+            style={{
+              left: `${position}%`,
+              transition: hintTransition ? `left ${hintTransition}` : undefined,
+            }}
           >
             <div className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-white/90 blur-[0.4px] shadow-[0_0_14px_3px_rgba(255,255,255,0.65)]" />
             <div
@@ -153,49 +220,39 @@ export default function HeroCarousel() {
         </div>
       </div>
 
-      {/* Dot indicators */}
-      <div className="mt-4 flex items-center justify-center gap-1.5">
-        {pairs.map((pair, i) => (
-          <button
-            key={pair.before}
-            type="button"
-            onClick={() => selectIndex(i)}
-            aria-label={`Go to example ${i + 1}`}
-            className={`h-1.5 rounded-full transition-all ${
-              i === index ? "w-5 bg-navy" : "w-1.5 bg-navy/25"
-            }`}
-          />
-        ))}
-      </div>
+      {/* Pair navigation — subtle soft arrows flanking the dots */}
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={prev}
+          aria-label="Previous example"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-navy/35 transition hover:bg-navy/5 hover:text-navy/70"
+        >
+          <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+        </button>
 
-      {/* Thumbnails + handwritten caption */}
-      <div className="mt-5 flex items-end justify-center gap-4">
-        <div className="flex gap-3">
-          {thumbnails.map((pair) => (
+        <div className="flex items-center gap-1.5">
+          {pairs.map((pair, i) => (
             <button
               key={pair.before}
               type="button"
-              onClick={() => selectIndex(pair.i)}
-              aria-label={`View ${pair.alt} example`}
-              className="relative flex h-14 w-14 overflow-hidden rounded-lg ring-1 ring-navy/10 transition hover:ring-navy/40 sm:h-16 sm:w-16"
-            >
-              <span className="relative h-full w-1/2 overflow-hidden">
-                <Image src={pair.before} alt="" fill sizes="32px" className="object-cover" />
-              </span>
-              <span className="relative h-full w-1/2 overflow-hidden">
-                <Image src={pair.after} alt="" fill sizes="32px" className="object-cover" />
-              </span>
-            </button>
+              onClick={() => selectIndex(i)}
+              aria-label={`Go to example ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${
+                i === index ? "w-5 bg-navy" : "w-1.5 bg-navy/25"
+              }`}
+            />
           ))}
         </div>
-        <div className="flex flex-col items-start pb-0.5">
-          <CornerDownLeft className="mb-1 h-4 w-4 -rotate-12 text-terracotta/70" strokeWidth={2} />
-          <p className="font-hand text-lg leading-tight text-navy/70 sm:text-xl">
-            See the magic
-            <br />
-            for yourself
-          </p>
-        </div>
+
+        <button
+          type="button"
+          onClick={next}
+          aria-label="Next example"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-navy/35 transition hover:bg-navy/5 hover:text-navy/70"
+        >
+          <ChevronRight className="h-4 w-4" strokeWidth={2} />
+        </button>
       </div>
     </div>
   );
