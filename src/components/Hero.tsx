@@ -3,9 +3,9 @@ import { Menu, Star, CheckCircle, Package, Truck, UploadCloud, ArrowRight, Heart
 import HeroCarousel from "@/components/HeroCarousel";
 
 const announcements = [
-  { icon: Star, text: "4.9/5 from 1,200+ families" },
+  { icon: Star, text: "New — preserve their drawings" },
   { icon: CheckCircle, text: "Free preview before you order" },
-  { icon: Package, text: "Printed in Sweden" },
+  { icon: Package, text: "Printed locally, wherever you are" },
   { icon: Truck, text: "Free shipping included" },
 ];
 
@@ -112,10 +112,10 @@ export default function Hero() {
               </span>
               <div>
                 <p className="font-hand text-lg leading-tight text-navy/80 sm:text-xl">
-                  &ldquo;We cried when it arrived.&rdquo;
+                  Be one of our first families.
                 </p>
                 <p className="mt-0.5 flex items-center gap-1 font-body text-xs text-navy/55">
-                  Loved by 1,200+ families
+                  Made with care, one drawing at a time
                   <Heart className="h-3 w-3 fill-terracotta/40 text-terracotta/60" strokeWidth={2} />
                 </p>
               </div>
