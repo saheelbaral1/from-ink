@@ -1,1 +1,75 @@
 @import "tailwindcss";
+
+@theme {
+  /* Brand palette */
+  --color-paper: #f7f4ee;
+  --color-ink: #1c1c1c;
+  --color-navy: #48546a;
+  --color-sage: #7b8b78;
+  --color-terracotta: #c98b72;
+
+  /* Type families (backed by next/font CSS variables) */
+  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
+
+  /* Soft, natural "paper resting on a surface" shadow */
+  --shadow-paper: 0 18px 40px -18px rgba(28, 28, 28, 0.28),
+    0 6px 14px -8px rgba(28, 28, 28, 0.18);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+}
+
+/*
+ * Barely-perceptible sketchbook-paper grain.
+ * Fixed, behind content (z-index:-1), non-interactive, ~4% opacity.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.85'%20numOctaves='4'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Calm, editorial motion for the upload wizard.
+ * No spinning — a slow "breathing" blob and a gentle fade-up between stages.
+ */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.22;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.45;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="breathe"],
+  [style*="fadeInUp"] {
+    animation: none !important;
+  }
+}
