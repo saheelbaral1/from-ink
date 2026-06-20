@@ -25,10 +25,10 @@ export default function Faq() {
         {/* LEFT — label + headline */}
         <div className="md:col-span-2">
           <span className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-navy/60">
-            Frequently asked
+            Questions
           </span>
           <h2 className="mt-3 font-display text-4xl italic leading-tight text-ink sm:text-5xl">
-            Questions, answered.
+            Frequently asked.
           </h2>
         </div>
 
