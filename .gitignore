@@ -43,3 +43,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# redundant original-import assets (only public/images/ is served & tracked)
+/images/
+
+# Claude Code — track shared settings.json, ignore machine-local state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
