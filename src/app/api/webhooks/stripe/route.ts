@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { randomUUID } from "crypto";
+import { sendOrderConfirmation } from "@/lib/email";
 
 interface GelatoOrderPayload {
   orderType: string;
@@ -131,6 +132,24 @@ export async function POST(req: NextRequest) {
         "[webhook] Gelato order CREATED:\n%s",
         JSON.stringify(gelatoData, null, 2),
       );
+
+      // Best-effort order-confirmation email — same principle as capture-email:
+      // a send failure must never fail the webhook (the Gelato order is what matters).
+      if (customerEmail) {
+        try {
+          await sendOrderConfirmation(customerEmail, {
+            imageUrl,
+            productName: "Classic Matte Poster, 40×50cm",
+            price: "€39",
+            deliveryEstimate: "Arriving in 5–12 business days",
+          });
+          console.log("[webhook] confirmation email sent to", customerEmail);
+        } catch (emailErr) {
+          console.error("[webhook] confirmation email failed (non-fatal):", emailErr);
+        }
+      } else {
+        console.warn("[webhook] no customer email on session — skipping confirmation email");
+      }
     }
   } catch (err) {
     console.error("[webhook] Gelato fetch error:", err);
