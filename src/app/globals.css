@@ -71,6 +71,22 @@ body::before {
   }
 }
 
+/* Celebratory burst when a keepsake finishes generating — soft particles
+   drift outward in the brand palette and fade. No spin, no neon. */
+@keyframes burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+  }
+  18% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 0), var(--ty, 0)) scale(1);
+  }
+}
+
 /* Barely-perceptible ambient drift of the paper grain (~34s loop). */
 @keyframes grainDrift {
   0% {
@@ -96,7 +112,8 @@ body::before {
 
 @media (prefers-reduced-motion: reduce) {
   [style*="breathe"],
-  [style*="fadeInUp"] {
+  [style*="fadeInUp"],
+  [style*="burst"] {
     animation: none !important;
   }
   /* Don't leave reveal content stuck hidden when motion is off. */

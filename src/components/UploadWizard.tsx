@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Lock, Check, RefreshCw } from "lucide-react";
+import Burst from "@/components/Burst";
 
 type Stage = "upload" | "generating" | "preview" | "order";
 
@@ -54,6 +55,8 @@ export default function UploadWizard() {
   const [msgIndex, setMsgIndex] = useState(0);
   const [email, setEmail] = useState("");
   const [processing, setProcessing] = useState(false);
+  // Bumped on each successful generation so the celebratory burst remounts & replays.
+  const [burstKey, setBurstKey] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -102,6 +105,7 @@ export default function UploadWizard() {
 
       setStorageUrl(json.storageUrl);
       setStage("preview");
+      setBurstKey((k) => k + 1); // celebrate the finished keepsake
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       // Surface the error in the stage the generation was launched from.
@@ -317,15 +321,18 @@ export default function UploadWizard() {
                   Your poster · preview
                 </span>
                 {storageUrl && (
-                  <div className="rotate-2 bg-white p-2 shadow-paper">
-                    <div
-                      className="relative aspect-[4/5] w-56 select-none bg-cover bg-center"
-                      style={{ backgroundImage: `url("${storageUrl}")` }}
-                      role="img"
-                      aria-label="Watermarked preview of your styled poster"
-                    >
-                      <div className="absolute inset-0 pointer-events-none" style={watermarkStyle} />
+                  <div className="relative">
+                    <div className="rotate-2 bg-white p-2 shadow-paper">
+                      <div
+                        className="relative aspect-[4/5] w-56 select-none bg-cover bg-center"
+                        style={{ backgroundImage: `url("${storageUrl}")` }}
+                        role="img"
+                        aria-label="Watermarked preview of your styled poster"
+                      >
+                        <div className="absolute inset-0 pointer-events-none" style={watermarkStyle} />
+                      </div>
                     </div>
+                    {burstKey > 0 && <Burst key={burstKey} />}
                   </div>
                 )}
               </figure>
