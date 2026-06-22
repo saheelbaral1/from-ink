@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import UploadWizard from "@/components/UploadWizard";
 import DrawerMoment from "@/components/DrawerMoment";
 import Faq from "@/components/Faq";
+import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 
 export default function Home() {
@@ -25,6 +26,8 @@ export default function Home() {
       </Reveal>
 
       <Faq />
+
+      <Footer />
     </main>
   );
 }

@@ -40,7 +40,16 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${inter.variable} ${caveat.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-paper font-body text-ink">{children}</body>
+      {/* Termly consent banner + autoBlock. Rendered as a plain async script so
+          React 19 hoists it into <head> and it loads early, before trackers can
+          fire. NOTE: next/script `beforeInteractive` was tried first but caused a
+          hydration mismatch (#418) under Next 16 — Termly mutates the document
+          before hydration, which full-document hydration can't reconcile.
+          suppressHydrationWarning on <body> tolerates Termly's runtime DOM injection. */}
+      <body suppressHydrationWarning className="min-h-full bg-paper font-body text-ink">
+        <script async src="https://app.termly.io/resource-blocker/c6f777ce-e1cc-4e40-8529-135243b4f409?autoBlock=on" />
+        {children}
+      </body>
     </html>
   );
 }
