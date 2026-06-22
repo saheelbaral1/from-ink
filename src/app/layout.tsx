@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, Caveat } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 // Display / editorial headlines — includes italic for emphasis words
@@ -40,14 +41,19 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${inter.variable} ${caveat.variable} h-full antialiased`}
     >
-      {/* Termly consent banner + autoBlock. Rendered as a plain async script so
-          React 19 hoists it into <head> and it loads early, before trackers can
-          fire. NOTE: next/script `beforeInteractive` was tried first but caused a
-          hydration mismatch (#418) under Next 16 — Termly mutates the document
-          before hydration, which full-document hydration can't reconcile.
-          suppressHydrationWarning on <body> tolerates Termly's runtime DOM injection. */}
+      {/* Termly consent banner + autoBlock, loaded afterInteractive so Termly's
+          DOM mutations happen AFTER hydration completes — avoiding the hydration
+          mismatch (#418) that both `beforeInteractive` and a plain async script
+          caused (those let Termly mutate the document during hydration; on Vercel's
+          timing the async race consistently lost). autoBlock still intercepts
+          trackers added after Termly loads. suppressHydrationWarning on <body> is
+          a safety net for Termly's runtime DOM injection. */}
       <body suppressHydrationWarning className="min-h-full bg-paper font-body text-ink">
-        <script async src="https://app.termly.io/resource-blocker/c6f777ce-e1cc-4e40-8529-135243b4f409?autoBlock=on" />
+        <Script
+          id="termly-resource-blocker"
+          src="https://app.termly.io/resource-blocker/c6f777ce-e1cc-4e40-8529-135243b4f409?autoBlock=on"
+          strategy="afterInteractive"
+        />
         {children}
       </body>
     </html>
