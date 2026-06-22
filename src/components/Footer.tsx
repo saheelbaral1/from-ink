@@ -18,6 +18,12 @@ export default function Footer() {
         <span className="text-navy/30" aria-hidden="true">
           ·
         </span>
+        <Link href="/return-policy" className="transition hover:text-navy">
+          Return Policy
+        </Link>
+        <span className="text-navy/30" aria-hidden="true">
+          ·
+        </span>
         <a href="#" className="termly-display-preferences transition hover:text-navy">
           Consent Preferences
         </a>
